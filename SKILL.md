@@ -1,8 +1,7 @@
 ---
 name: persona
-description: Activate, list, create, edit, delete, or deactivate expert personas that shape how Claude assists you. Use when a user wants to work as a specialist — security expert, debugger, data scientist, etc. Invoke with /persona list, /persona <name>, /persona create, /persona edit <name>, /persona delete <name>, or /persona off.
-disable-model-invocation: true
-allowed-tools: Read, Write, Glob, Bash
+description: Activate, list, create, edit, delete, or deactivate expert personas that shape how Claude assists you. Spawn a single persona as a sub-agent for a specific task, or run multiple relevant personas in parallel. Invoke with /persona list, /persona <name>, /persona spawn <name> <task>, /persona multi <task>, /persona create, /persona edit <name>, /persona delete <name>, or /persona off.
+allowed-tools: Read, Write, Glob, Bash, Agent
 ---
 
 # Persona Manager
@@ -22,13 +21,15 @@ Print a concise usage reference:
 ```
 Persona Manager
 ───────────────────────────────────────────────
-/persona list               List all available personas
-/persona <name>             Activate a persona
-/persona create             Create a new persona (guided)
-/persona edit <name>        Edit an existing persona
-/persona delete <name>      Delete a persona
-/persona off                Deactivate the current persona
-/persona help               Show this help message
+/persona list                        List all available personas
+/persona <name>                      Activate a persona for this session
+/persona spawn <name> <task>         Run a task using a specific persona as a sub-agent
+/persona multi <task>                Run a task across multiple relevant personas in parallel
+/persona create                      Create a new persona (guided)
+/persona edit <name>                 Edit an existing persona
+/persona delete <name>               Delete a persona
+/persona off                         Deactivate the current persona
+/persona help                        Show this help message
 
 Tip: <name> is fuzzy-matched — "security" finds "security-expert"
 ```
@@ -146,6 +147,108 @@ When $ARGUMENTS starts with **"delete"** or **"remove"**, extract the name after
 4. If confirmed, delete the file using a Bash `rm` command.
 5. Confirm: "Persona **<name>** deleted."
 6. If this persona was currently active, deactivate it as per `/persona off`.
+
+---
+
+## `/persona spawn <name> <task>`
+
+When $ARGUMENTS starts with **"spawn"**:
+
+1. Remove the leading "spawn" word from $ARGUMENTS. The remaining text has the format `<name> <task>` — the first word is the persona name, everything after it is the task description.
+   - If nothing remains after "spawn", say: "Usage: `/persona spawn <name> <task>`" — then stop.
+   - If only a name is present with no task, say: "Please provide a task. Usage: `/persona spawn <name> <task>`" — then stop.
+
+2. Extract the persona name (first word) and task (all remaining words).
+
+3. Resolve the persona file using the same exact → partial → suggest matching logic as `/persona <name>`. If no match is found, stop.
+
+4. Read the full persona file content.
+
+5. Launch a sub-agent using the Agent tool with the following prompt structure:
+
+```
+You are operating as the following expert persona. Apply this persona fully for all responses.
+
+---
+[full persona file content]
+---
+
+Task:
+[task]
+
+Complete the task above from the perspective of this persona. Apply the persona's priorities, communication style, and domain expertise throughout your response.
+```
+
+6. Once the sub-agent returns its result, present it to the user under a labeled header:
+
+```
+## [Persona Name] — Sub-agent Result
+
+[result]
+```
+
+   Note that the session persona (if one is active) was not affected — it remains unchanged.
+
+---
+
+## `/persona multi <task>`
+
+When $ARGUMENTS starts with **"multi"**:
+
+1. Extract the task — everything after the word "multi".
+   - If nothing remains, say: "Please provide a task. Usage: `/persona multi <task>`" — then stop.
+
+2. Glob all `.md` files in `${CLAUDE_SKILL_DIR}/personas/` and read the first paragraph of each to understand what each persona covers.
+
+3. Select 2–4 personas that are most relevant to the task. Choose based on which personas would give meaningfully different and useful perspectives. For example:
+   - An API design task → `architect`, `security-expert`, `senior-engineer`
+   - A product feature → `product-manager`, `product-researcher`, `senior-engineer`
+   - A legal contract → `legal-reviewer` only (don't dilute with irrelevant perspectives)
+
+4. Read the full file for each selected persona.
+
+5. Launch one sub-agent per selected persona **in parallel** using the Agent tool. Use this prompt structure for each:
+
+```
+You are operating as the following expert persona. Apply this persona fully for all responses.
+
+---
+[full persona file content]
+---
+
+Task:
+[task]
+
+Complete the task above from the perspective of this persona. Apply the persona's priorities, communication style, and domain expertise throughout your response. Be concise — focus on the insights unique to your role.
+```
+
+6. Once all sub-agents return, present the results in clearly labeled sections:
+
+```
+## Multi-Persona Analysis
+
+**Task:** [task]
+**Perspectives:** [list of persona names used]
+
+---
+
+### [Persona 1 Name]
+[result]
+
+---
+
+### [Persona 2 Name]
+[result]
+
+---
+
+### [Persona 3 Name]
+[result]
+```
+
+7. After all results, add a brief **Synthesis** section (3–5 bullets) that surfaces the key points of agreement and disagreement across the personas.
+
+   Note that the session persona (if one is active) was not affected — it remains unchanged.
 
 ---
 

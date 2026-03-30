@@ -8,7 +8,9 @@ Switch Claude into expert modes mid-conversation. One command activates a specia
 
 The `/persona` skill lets you:
 
-- **Activate** a built-in or custom expert persona
+- **Activate** a built-in or custom expert persona for your session
+- **Spawn** a single persona as a sub-agent to handle a specific task
+- **Multi** — run a task across several relevant personas in parallel and get a synthesized result
 - **List** all available personas
 - **Create** new personas with a guided template
 - **Edit** existing personas
@@ -79,6 +81,32 @@ Once activated, Claude immediately adopts that persona's priorities, expertise, 
 
 ---
 
+### Spawn a persona as a sub-agent
+
+```
+/persona spawn security-expert review this authentication flow for vulnerabilities
+```
+
+Launches a sub-agent that runs the given task entirely through the specified persona's lens. The sub-agent completes its work and returns the result — your session persona is unaffected.
+
+Useful when you want a one-off expert opinion without switching your session context.
+
+---
+
+### Run a task across multiple personas in parallel
+
+```
+/persona multi design a REST API for user authentication
+```
+
+Claude selects 2–4 personas most relevant to the task, spawns one sub-agent per persona simultaneously, then presents each result in a labeled section followed by a **Synthesis** — key points of agreement and disagreement across all perspectives.
+
+Example personas Claude might select for the above task: `architect`, `security-expert`, `senior-engineer`.
+
+Your session persona is unaffected.
+
+---
+
 ### Deactivate the current persona
 
 ```
@@ -137,6 +165,20 @@ Claude asks for confirmation before deleting. This action cannot be undone.
 ```
 
 Prints the full command reference.
+
+---
+
+## Session persona vs. sub-agents
+
+These operate independently:
+
+| | Session (`/persona <name>`) | Sub-agent (`spawn` / `multi`) |
+|---|---|---|
+| **Scope** | Shapes every response in the session | Handles one specific task |
+| **Persistence** | Active until `/persona off` or session ends | Completes and exits |
+| **Combinable** | Yes — have `security-expert` active while spawning `architect` | Yes |
+
+You can have a session persona active while using `spawn` or `multi` — they don't interfere with each other.
 
 ---
 
