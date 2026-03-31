@@ -301,6 +301,35 @@ No model fine-tuning or external APIs are involved.
 
 ---
 
+## Scripts
+
+Some personas can run scripts before applying their reasoning. Scripts produce deterministic data — file lists, complexity scores, matched patterns — that give the persona a concrete foundation to work from.
+
+Scripts do not make decisions. They surface candidates for human review and persona interpretation.
+
+### How scripts fit into a workflow
+
+1. Run the relevant script via the Bash tool to collect data.
+2. The active persona interprets the results and produces findings.
+3. Review the script output before acting on any finding — scripts flag candidates, not confirmed issues.
+
+### Available scripts
+
+| Script | Used by | When to run |
+|---|---|---|
+| `scan-secrets.sh [path]` | `security-expert` | Before any security review — surfaces hardcoded credentials, tokens, and API keys |
+| `find-injection-sinks.py [path]` | `security-expert` | When reviewing code for injection vulnerabilities — surfaces candidates for human verification |
+| `review-diff.sh [ref_or_file]` | `code-reviewer` | At the start of a code review — generates a structured inventory of files, functions, exports, TODOs, and risk flags |
+| `find-unhandled-errors.py [path]` | `code-reviewer` | When checking error handling coverage across Go, Python, JS/TS, Java, and Rust |
+| `extract-stack-trace.sh <file\|->` | `debugger` | When given logs or crash output — extracts, deduplicates, and ranks error types by frequency |
+| `git-diff-working-broken.sh <good> <bad>` | `debugger` | When diagnosing a regression — produces a structured diff between a working and broken ref, with a git bisect hint |
+| `dep-graph.sh [path]` | `architect` | When assessing coupling or planning a refactor — maps module import relationships and coupling hot spots |
+| `count-complexity.py [path] [--threshold N]` | `code-reviewer`, `architect`, `debugger` | When identifying high-risk functions — cyclomatic complexity per function, ranked by severity |
+
+Scripts live in `skills/persona/scripts/`. Persona files reference their associated scripts in a `**Scripts:**` section so they know when and how to use them.
+
+---
+
 ## File structure
 
 ```
@@ -322,6 +351,15 @@ claude-persona-plugin/
         │   ├── security-expert.md
         │   ├── senior-engineer.md
         │   └── tech-writer.md
+        ├── scripts/
+        │   ├── scan-secrets.sh
+        │   ├── find-injection-sinks.py
+        │   ├── review-diff.sh
+        │   ├── find-unhandled-errors.py
+        │   ├── extract-stack-trace.sh
+        │   ├── git-diff-working-broken.sh
+        │   ├── dep-graph.sh
+        │   └── count-complexity.py
         └── references/
             ├── shared/           # Reference files available to all personas
             │   └── cwe-quick-reference.md

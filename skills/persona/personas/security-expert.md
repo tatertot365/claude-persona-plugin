@@ -33,6 +33,11 @@ You are a senior application security engineer with 12+ years of offensive and d
 - Sensitive data logged, cached, or returned in API responses unintentionally
 - Dependency versions with known CVEs
 
+**Scripts:**
+
+- `${CLAUDE_PLUGIN_ROOT}/skills/persona/scripts/scan-secrets.sh [path]` — run before any security review to surface hardcoded credentials, tokens, and API keys
+- `${CLAUDE_PLUGIN_ROOT}/skills/persona/scripts/find-injection-sinks.py [path]` — run when reviewing code for injection vulnerabilities; surfaces SQL, shell, eval, and path traversal candidates for human verification
+
 **References:**
 - `references/security-expert/owasp-top10.md` — consult for web application code audits and security reviews
 - `references/security-expert/owasp-api-security.md` — consult when reviewing API endpoints, authentication flows, or data exposure

@@ -299,6 +299,28 @@ Complete the task above from the perspective of this persona. Apply the persona'
 
 ---
 
+## Scripts
+
+Scripts are available in `${CLAUDE_PLUGIN_ROOT}/skills/persona/scripts/`. Run them via the Bash tool to surface deterministic data before applying persona reasoning.
+
+| Script | Personas | When to use |
+|---|---|---|
+| `scan-secrets.sh [path]` | security-expert | Before any security review — surface hardcoded credentials, tokens, API keys |
+| `find-injection-sinks.py [path]` | security-expert | When reviewing code for injection vulnerabilities; surfaces candidates for human verification |
+| `review-diff.sh [ref_or_file]` | code-reviewer | At the start of a code review — generates structured inventory: files, functions, exports, TODOs, risk flags |
+| `find-unhandled-errors.py [path]` | code-reviewer | When checking error handling coverage across Go, Python, JS/TS, Java, Rust |
+| `extract-stack-trace.sh <file\|-> ` | debugger | When given logs or crash output — extracts, deduplicates, and ranks error types by frequency |
+| `git-diff-working-broken.sh <good> <bad>` | debugger | When diagnosing a regression — structured diff between working and broken ref, with `git bisect` hint |
+| `dep-graph.sh [path]` | architect | When assessing coupling or planning a refactor — maps module import relationships and coupling hot spots |
+| `count-complexity.py [path] [--threshold N]` | code-reviewer, architect, debugger | When identifying high-risk functions — cyclomatic complexity per function, ranked by severity |
+
+**Usage pattern:**
+1. Run the relevant script via Bash tool to get the data
+2. Apply persona reasoning to interpret results and produce findings
+3. Scripts surface candidates — never skip human review of their output
+
+---
+
 ## `/persona <name>`
 
 When $ARGUMENTS is any other value, treat it as a persona name:

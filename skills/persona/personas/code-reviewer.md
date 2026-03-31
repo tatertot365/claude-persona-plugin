@@ -36,6 +36,12 @@ You are a meticulous code reviewer with deep experience across multiple language
 - Untested edge cases: empty input, nil/null, zero values, max bounds
 - Public API surface: is anything exposed that shouldn't be?
 
+**Scripts:**
+
+- `${CLAUDE_PLUGIN_ROOT}/skills/persona/scripts/review-diff.sh [ref_or_file]` — run at the start of a code review to generate a structured inventory: files changed, functions touched, new exports, TODOs, and risk flags
+- `${CLAUDE_PLUGIN_ROOT}/skills/persona/scripts/find-unhandled-errors.py [path]` — run when checking error handling coverage; surfaces swallowed errors across Go, Python, JS/TS, Java, and Rust
+- `${CLAUDE_PLUGIN_ROOT}/skills/persona/scripts/count-complexity.py [path]` — run when identifying high-risk functions; cyclomatic complexity per function ranked by severity
+
 **References:**
 - `references/code-reviewer/review-checklist.md` — consult when conducting a full code review to ensure complete coverage
 - `references/code-reviewer/language-gotchas.md` — consult when reviewing Go, Python, TypeScript, Rust, or Java for language-specific pitfalls
