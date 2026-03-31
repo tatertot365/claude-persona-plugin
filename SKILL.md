@@ -25,6 +25,7 @@ Persona Manager
 /persona <name>                      Activate a persona for this session
 /persona spawn <name> <task>         Run a task using a specific persona as a sub-agent
 /persona multi <task>                Run a task across multiple relevant personas in parallel
+/persona ref <name>                  Show references for a persona
 /persona create                      Create a new persona (guided)
 /persona edit <name>                 Edit an existing persona
 /persona delete <name>               Delete a persona
@@ -33,6 +34,33 @@ Persona Manager
 
 Tip: <name> is fuzzy-matched — "security" finds "security-expert"
 ```
+
+---
+
+## `/persona ref <name>`
+
+When $ARGUMENTS starts with **"ref"**, extract the name after it.
+- If no name was provided (i.e. $ARGUMENTS is exactly "ref"), say: "Which persona's references would you like to see? Usage: `/persona ref <name>`" — then stop.
+- Otherwise, normalize the name and resolve the file using the same exact → partial → suggest matching logic as `/persona <name>`. If no match is found, stop.
+
+3. Read the persona file and look for a `**References:**` section.
+   - If no References section exists, say: "**<name>** has no references defined." — then stop.
+
+4. Display the references in this format:
+
+```
+References for <name>
+──────────────────────
+• <filename> — <when-to-consult description>
+• <filename> — <when-to-consult description>
+
+Use /persona ref <name> load <filename> to load a reference into the current session.
+```
+
+5. If $ARGUMENTS contains "load" followed by a filename (e.g. `ref security-expert load owasp-top10.md`):
+   - Resolve the full path from the persona's References section matching that filename
+   - Read the file and display its full contents under a header: `## Reference: <filename>`
+   - Confirm: "Reference loaded into session context."
 
 ---
 
@@ -164,7 +192,9 @@ When $ARGUMENTS starts with **"spawn"**:
 
 4. Read the full persona file content.
 
-5. Launch a sub-agent using the Agent tool with the following prompt structure:
+5. If the persona file contains a `**References:**` section, read every referenced file listed in it. Collect their contents to bundle into the sub-agent prompt.
+
+6. Launch a sub-agent using the Agent tool with the following prompt structure:
 
 ```
 You are operating as the following expert persona. Apply this persona fully for all responses.
@@ -173,10 +203,19 @@ You are operating as the following expert persona. Apply this persona fully for 
 [full persona file content]
 ---
 
+[If references were loaded, include them here:]
+## Reference Materials
+
+### [reference filename 1]
+[reference file 1 content]
+
+### [reference filename 2]
+[reference file 2 content]
+
 Task:
 [task]
 
-Complete the task above from the perspective of this persona. Apply the persona's priorities, communication style, and domain expertise throughout your response.
+Complete the task above from the perspective of this persona. Apply the persona's priorities, communication style, and domain expertise throughout your response. Use the reference materials above where relevant.
 ```
 
 6. Once the sub-agent returns its result, present it to the user under a labeled header:
@@ -205,7 +244,7 @@ When $ARGUMENTS starts with **"multi"**:
    - A product feature → `product-manager`, `product-researcher`, `senior-engineer`
    - A legal contract → `legal-reviewer` only (don't dilute with irrelevant perspectives)
 
-4. Read the full file for each selected persona.
+4. Read the full file for each selected persona. For each persona, also read any files listed in its `**References:**` section.
 
 5. Launch one sub-agent per selected persona **in parallel** using the Agent tool. Use this prompt structure for each:
 
@@ -216,10 +255,19 @@ You are operating as the following expert persona. Apply this persona fully for 
 [full persona file content]
 ---
 
+[If references were loaded for this persona, include them here:]
+## Reference Materials
+
+### [reference filename 1]
+[reference file 1 content]
+
+### [reference filename 2]
+[reference file 2 content]
+
 Task:
 [task]
 
-Complete the task above from the perspective of this persona. Apply the persona's priorities, communication style, and domain expertise throughout your response. Be concise — focus on the insights unique to your role.
+Complete the task above from the perspective of this persona. Apply the persona's priorities, communication style, and domain expertise throughout your response. Use the reference materials above where relevant. Be concise — focus on the insights unique to your role.
 ```
 
 6. Once all sub-agents return, present the results in clearly labeled sections:
@@ -270,3 +318,4 @@ When $ARGUMENTS is any other value, treat it as a persona name:
 6. Confirm: "Persona activated: **<name>**. [One sentence summarizing who they are and their style.]"
 7. **Immediately adopt this persona** — don't wait for the next message.
 8. **For every subsequent response in this conversation**, before formulating your reply, re-apply the persona's priorities, communication style, and domain expertise as defined in the file. If you notice your response drifting toward generic Claude behavior, correct course and re-anchor to the persona.
+9. **Do not pre-load references.** If the persona file contains a `**References:**` section, do not read those files on activation. Instead, consult them during the conversation when the task warrants it, as indicated by the when-to-consult criteria listed next to each reference path. Use the Read tool to load a reference file at the moment it becomes relevant.

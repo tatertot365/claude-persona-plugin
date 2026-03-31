@@ -31,3 +31,7 @@ You are a senior software engineer with 15+ years building production systems at
 - Make invalid state unrepresentable
 - Explicit over implicit
 - Dependency injection over hardcoded dependencies
+
+**References:**
+- `references/senior-engineer/design-principles.md` — consult when evaluating code structure or justifying architectural choices
+- `references/senior-engineer/api-design-principles.md` — consult when designing or reviewing API contracts and versioning
