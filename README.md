@@ -1,46 +1,58 @@
-# Persona Skill for Claude Code
+# Persona Plugin for Claude Code
 
 Switch Claude into expert modes mid-conversation. One command activates a specialist persona — security expert, debugger, architect, and more — shaping Claude's priorities, communication style, and domain focus for the rest of the session.
+
+Personas are **session-only**. They apply to the current conversation and reset when the session ends.
 
 ---
 
 ## What it does
 
-The `/persona` skill lets you:
+The `/persona` command lets you:
 
 - **Activate** a built-in or custom expert persona for your session
 - **Spawn** a single persona as a sub-agent to handle a specific task
 - **Multi** — run a task across several relevant personas in parallel and get a synthesized result
 - **List** all available personas
+- **View references** a persona uses for its expertise
 - **Create** new personas with a guided template
 - **Edit** existing personas
 - **Delete** personas you no longer need
 - **Deactivate** the current persona and return to default Claude behavior
 
-Personas are **session-only** — they apply for the current conversation and reset when the session ends.
-
 ---
 
 ## Prerequisites
 
-- [Claude Code](https://claude.ai/code) CLI installed and authenticated
-- Claude Code skills support (available in Claude Code CLI)
+- [Claude Code](https://claude.ai/code) installed and authenticated
 
 ---
 
 ## Installation
 
-Clone this repo into your Claude Code skills directory:
+Clone the repository:
 
 ```bash
-git clone https://github.com/tatertot365/claude-skill-personas ~/.claude/skills/persona
+git clone https://github.com/tatertot365/claude-persona-plugin
 ```
 
-That's it. Claude Code automatically discovers skills in `~/.claude/skills/` via each skill's `SKILL.md` file.
+Then add it as a plugin in Claude Code. The exact CLI flag depends on your Claude Code version — check `claude --help` or your Claude Code settings for the plugin installation option. Point it at the cloned directory.
+
+Claude Code discovers the `/persona` skill automatically from the plugin's `skills/persona/SKILL.md` file.
 
 ---
 
-## Usage
+## Quick start
+
+```
+/persona security-expert
+```
+
+Claude confirms activation and immediately responds as a senior application security engineer. Run `/persona off` to return to default behavior.
+
+---
+
+## Command reference
 
 ### List available personas
 
@@ -59,7 +71,7 @@ Available Personas
   security-expert    — Adversarial mindset; looks for how code can be exploited
   ...
 
-Use /persona <name> to activate · /persona off to deactivate · /persona create to add a new one
+Use /persona <name> to activate · /persona off to deactivate · /persona create to add a new one · /persona edit <name> to edit · /persona delete <name> to delete
 ```
 
 ---
@@ -67,7 +79,7 @@ Use /persona <name> to activate · /persona off to deactivate · /persona create
 ### Activate a persona
 
 ```
-/persona security-expert
+/persona <name>
 ```
 
 Fuzzy matching is supported — partial names work:
@@ -77,29 +89,67 @@ Fuzzy matching is supported — partial names work:
 /persona debug         → activates debugger
 ```
 
-Once activated, Claude immediately adopts that persona's priorities, expertise, and communication style for every subsequent response in the session.
+Claude confirms activation and immediately adopts the persona's priorities, expertise, and communication style for every subsequent response in the session.
+
+---
+
+### View a persona's references
+
+```
+/persona ref <name>
+```
+
+Lists the reference documents bundled with the persona and when to consult each one.
+
+```
+References for security-expert
+──────────────────────
+• owasp-top10.md — consult for web application code audits and security reviews
+• owasp-api-security.md — consult when reviewing API endpoints, authentication flows, or data exposure
+• cwe-quick-reference.md — consult when citing specific vulnerability classes or CWE identifiers
+
+Use /persona ref <name> load <filename> to load a reference into the current session.
+```
+
+To load a reference file into your session context:
+
+```
+/persona ref security-expert load owasp-top10.md
+```
 
 ---
 
 ### Spawn a persona as a sub-agent
 
 ```
+/persona spawn <name> <task>
+```
+
+Example:
+
+```
 /persona spawn security-expert review this authentication flow for vulnerabilities
 ```
 
-Launches a sub-agent that runs the given task entirely through the specified persona's lens. The sub-agent completes its work and returns the result — your session persona is unaffected.
+Launches a sub-agent that completes the task entirely through the specified persona's lens, then returns the result. Your session persona is unaffected.
 
-Useful when you want a one-off expert opinion without switching your session context.
+Use `spawn` when you want a one-off expert opinion without switching your session context.
 
 ---
 
 ### Run a task across multiple personas in parallel
 
 ```
+/persona multi <task>
+```
+
+Example:
+
+```
 /persona multi design a REST API for user authentication
 ```
 
-Claude selects 2–4 personas most relevant to the task, spawns one sub-agent per persona simultaneously, then presents each result in a labeled section followed by a **Synthesis** — key points of agreement and disagreement across all perspectives.
+Claude selects 2–4 personas most relevant to the task, spawns one sub-agent per persona simultaneously, and presents each result in a labeled section. A **Synthesis** section follows — key points of agreement and disagreement across all perspectives.
 
 Example personas Claude might select for the above task: `architect`, `security-expert`, `senior-engineer`.
 
@@ -126,32 +176,32 @@ Returns Claude to default behavior. Also accepts `/persona deactivate` and `/per
 Claude prompts you to fill out a template:
 
 ```
-Name: <lowercase-hyphenated, e.g. api-architect>
-Role: <one sentence describing the expert role>
-Tone: <communication style, e.g. direct, educational, rigorous, warm>
+Name:       <lowercase-hyphenated, e.g. api-architect>
+Role:       <one sentence describing the expert role>
+Tone:       <communication style, e.g. direct, educational, rigorous, warm>
 Priorities: <2–3 things this expert always optimizes for>
-Expertise: <key domains, tools, or methodologies>
-Pitfalls: <common mistakes or anti-patterns this expert watches for>
+Expertise:  <key domains, tools, or methodologies>
+Pitfalls:   <common mistakes or anti-patterns this expert watches for (optional)>
 ```
 
-Claude generates a `.md` file from your input and saves it to `~/.claude/skills/persona/personas/`. It then asks if you want to activate the new persona immediately.
+Claude generates a `.md` file from your input and saves it to `skills/persona/personas/`. It then asks whether to activate the new persona immediately.
 
 ---
 
 ### Edit a persona
 
 ```
-/persona edit security-expert
+/persona edit <name>
 ```
 
-Claude displays the current file contents and asks what you'd like to change. After you describe the changes, it rewrites the file and confirms what was updated.
+Claude displays the current file and asks what you'd like to change. After you describe the changes, it rewrites the file and confirms what was updated.
 
 ---
 
 ### Delete a persona
 
 ```
-/persona delete security-expert
+/persona delete <name>
 ```
 
 Claude asks for confirmation before deleting. This action cannot be undone.
@@ -164,21 +214,21 @@ Claude asks for confirmation before deleting. This action cannot be undone.
 /persona help
 ```
 
-Prints the full command reference.
+Prints the full command reference. Running `/persona` with no arguments shows the same output.
 
 ---
 
 ## Session persona vs. sub-agents
 
-These operate independently:
+These two modes operate independently and can run at the same time:
 
 | | Session (`/persona <name>`) | Sub-agent (`spawn` / `multi`) |
 |---|---|---|
 | **Scope** | Shapes every response in the session | Handles one specific task |
 | **Persistence** | Active until `/persona off` or session ends | Completes and exits |
-| **Combinable** | Yes — have `security-expert` active while spawning `architect` | Yes |
+| **Combinable** | Yes | Yes |
 
-You can have a session persona active while using `spawn` or `multi` — they don't interfere with each other.
+Example: activate `security-expert` as your session persona, then run `/persona spawn architect design a caching layer` — both operate simultaneously without interfering.
 
 ---
 
@@ -202,9 +252,9 @@ You can have a session persona active while using `spawn` or `multi` — they do
 
 ## Adding your own personas
 
-Personas are plain Markdown files in `~/.claude/skills/persona/personas/`. You can create one manually or use `/persona create`.
+Personas are plain Markdown files in `skills/persona/personas/`. Create one manually or use `/persona create`.
 
-Each persona file follows this structure:
+Each file follows this structure:
 
 ```markdown
 # Name
@@ -231,31 +281,55 @@ One paragraph describing who this expert is and their default mindset.
 
 Save the file as `<name>.md` in the `personas/` directory. It appears in `/persona list` immediately.
 
+To give a persona reference documents (files it can consult during a session), add a `**References:**` section to the persona file and place the reference files in `skills/persona/references/<name>/`. Shared references that apply to multiple personas go in `skills/persona/references/shared/`.
+
+```markdown
+**References:**
+- `references/<name>/my-reference.md` — consult when ...
+- `references/shared/cwe-quick-reference.md` — consult when citing CWE identifiers
+```
+
 ---
 
 ## How it works
 
-The skill is defined in `SKILL.md` at the root of this directory. When you run `/persona <arguments>`, Claude Code loads `SKILL.md` and executes its instructions using the `Read`, `Write`, `Glob`, and `Bash` tools.
+The skill is defined in `skills/persona/SKILL.md`. When you run `/persona <arguments>`, Claude Code loads that file and executes its instructions using the `Read`, `Write`, `Glob`, and `Bash` tools.
 
-Persona files are read at activation time — Claude ingests the full file and applies it as behavioral context for the rest of the session. No model fine-tuning or external APIs are involved.
+Persona files are read at activation time. Claude ingests the full file and applies it as behavioral context for the rest of the session. References are loaded on demand — not upfront — based on when the task warrants them.
+
+No model fine-tuning or external APIs are involved.
 
 ---
 
 ## File structure
 
 ```
-~/.claude/skills/persona/
-├── SKILL.md              # Skill definition (entry point)
-└── personas/
-    ├── architect.md
-    ├── code-reviewer.md
-    ├── data-scientist.md
-    ├── debugger.md
-    ├── graphic-designer.md
-    ├── legal-reviewer.md
-    ├── product-manager.md
-    ├── product-researcher.md
-    ├── security-expert.md
-    ├── senior-engineer.md
-    └── tech-writer.md
+claude-persona-plugin/
+├── .claude-plugin/
+│   └── plugin.json              # Plugin metadata (hidden directory)
+└── skills/
+    └── persona/
+        ├── SKILL.md              # Skill definition (entry point)
+        ├── personas/
+        │   ├── architect.md
+        │   ├── code-reviewer.md
+        │   ├── data-scientist.md
+        │   ├── debugger.md
+        │   ├── graphic-designer.md
+        │   ├── legal-reviewer.md
+        │   ├── product-manager.md
+        │   ├── product-researcher.md
+        │   ├── security-expert.md
+        │   ├── senior-engineer.md
+        │   └── tech-writer.md
+        └── references/
+            ├── shared/           # Reference files available to all personas
+            │   └── cwe-quick-reference.md
+            ├── architect/
+            │   ├── adr-template.md
+            │   └── system-design-patterns.md
+            ├── security-expert/
+            │   ├── owasp-top10.md
+            │   └── owasp-api-security.md
+            └── ...               # One directory per persona (if it has references)
 ```

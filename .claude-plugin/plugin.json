@@ -10,13 +10,17 @@
   "keywords": [
     "persona",
     "expert",
+    "roles",
     "review",
+    "code-review",
+    "security",
     "architect",
     "developer",
     "designer",
     "writer",
-    "parallel",
-    "sub-agent"
+    "assistant",
+    "productivity",
+    "workflow"
   ],
   "license": "MIT"
 }

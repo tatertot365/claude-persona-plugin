@@ -1,7 +1,6 @@
 ---
 name: persona
 description: Activate, list, create, edit, delete, or deactivate expert personas that shape how Claude assists you. Spawn a single persona as a sub-agent for a specific task, or run multiple relevant personas in parallel. Invoke with /persona list, /persona <name>, /persona spawn <name> <task>, /persona multi <task>, /persona create, /persona edit <name>, /persona delete <name>, /persona ref <name>, or /persona off.
-allowed-tools: Read, Write, Glob, Bash, Agent
 ---
 
 # Persona Manager
@@ -68,7 +67,7 @@ Use /persona ref <name> load <filename> to load a reference into the current ses
 
 When $ARGUMENTS is **"list"**:
 
-1. Use Glob to find all `.md` files in `${CLAUDE_SKILL_DIR}/personas/`
+1. Use Glob to find all `.md` files in `${CLAUDE_PLUGIN_ROOT}/skills/persona/personas/`
 2. Read each file and extract the `# Name` heading and the first paragraph after it
 3. Print a clean list in this format, marking the currently active persona with `▶` and **(active)** if one is active in this session:
 
@@ -147,7 +146,7 @@ Pitfalls: <common mistakes or anti-patterns this expert watches for>
 
    Aim for 30–50 lines. Fewer lines are fine if the persona is well-defined; exceed 50 only if the extra content meaningfully improves specificity.
 
-3. Write it to `${CLAUDE_SKILL_DIR}/personas/<name>.md`
+3. Write it to `${CLAUDE_PLUGIN_ROOT}/skills/persona/personas/<name>.md`
 
 4. Ask: "Activate this persona now?" If yes, proceed as with `/persona <name>`.
 
@@ -237,7 +236,7 @@ When $ARGUMENTS starts with **"multi"**:
 1. Extract the task — everything after the word "multi".
    - If nothing remains, say: "Please provide a task. Usage: `/persona multi <task>`" — then stop.
 
-2. Glob all `.md` files in `${CLAUDE_SKILL_DIR}/personas/` and read the first paragraph of each to understand what each persona covers.
+2. Glob all `.md` files in `${CLAUDE_PLUGIN_ROOT}/skills/persona/personas/` and read the first paragraph of each to understand what each persona covers.
 
 3. Select 2–4 personas that are most relevant to the task. Choose based on which personas would give meaningfully different and useful perspectives. For example:
    - An API design task → `architect`, `security-expert`, `senior-engineer`
@@ -306,9 +305,9 @@ When $ARGUMENTS is any other value, treat it as a persona name:
 
 1. **Normalize** the input: lowercase it and replace any spaces with hyphens. Use this normalized value for all matching below.
 
-2. **Exact match**: try `${CLAUDE_SKILL_DIR}/personas/<normalized>.md`. If it exists, jump to step 5.
+2. **Exact match**: try `${CLAUDE_PLUGIN_ROOT}/skills/persona/personas/<normalized>.md`. If it exists, jump to step 5.
 
-3. **Partial match**: Glob all `.md` files in `${CLAUDE_SKILL_DIR}/personas/` and collect filenames (without extension). Check if any filename *contains* the normalized input as a substring.
+3. **Partial match**: Glob all `.md` files in `${CLAUDE_PLUGIN_ROOT}/skills/persona/personas/` and collect filenames (without extension). Check if any filename *contains* the normalized input as a substring.
    - If exactly one file matches: jump to step 5 using that file.
    - If multiple files match: say "Multiple personas match '<input>': [list]. Which did you mean?" and stop.
 
