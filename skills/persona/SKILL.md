@@ -1,6 +1,6 @@
 ---
 name: persona
-description: Activate, list, create, edit, delete, or deactivate expert personas that shape how Claude assists you. Spawn a single persona as a sub-agent for a specific task, or run multiple relevant personas in parallel. Invoke with /persona list, /persona <name>, /persona spawn <name> <task>, /persona multi <task>, /persona create, /persona edit <name>, /persona delete <name>, or /persona off.
+description: Activate, list, create, edit, delete, or deactivate expert personas that shape how Claude assists you. Spawn a single persona as a sub-agent for a specific task, or run multiple relevant personas in parallel. Invoke with /persona list, /persona <name>, /persona spawn <name> <task>, /persona multi <task>, /persona create, /persona edit <name>, /persona delete <name>, /persona ref <name>, or /persona off.
 allowed-tools: Read, Write, Glob, Bash, Agent
 ---
 

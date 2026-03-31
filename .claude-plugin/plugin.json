@@ -1,0 +1,22 @@
+{
+  "name": "persona",
+  "description": "Activate, list, create, edit, delete, or deactivate expert personas that shape how Claude assists you. Spawn a single persona as a sub-agent for a specific task, or run multiple relevant personas in parallel.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Tatertot365",
+    "url": "https://github.com/tatertot365"
+  },
+  "repository": "https://github.com/tatertot365/claude-persona-plugin",
+  "keywords": [
+    "persona",
+    "expert",
+    "review",
+    "architect",
+    "developer",
+    "designer",
+    "writer",
+    "parallel",
+    "sub-agent"
+  ],
+  "license": "MIT"
+}
