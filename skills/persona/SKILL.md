@@ -1,6 +1,6 @@
 ---
 name: persona
-description: Activate, list, create, edit, delete, or deactivate expert personas that shape how Claude assists you. Spawn a single persona as a sub-agent for a specific task, or run multiple relevant personas in parallel. Invoke with /persona list, /persona <name>, /persona spawn <name> <task>, /persona multi <task>, /persona create, /persona edit <name>, /persona delete <name>, /persona ref <name>, or /persona off.
+description: Activate, list, create, edit, delete, or deactivate expert personas that shape how Claude assists you. Spawn a single persona as a sub-agent for a specific task, or run multiple relevant personas in parallel. Invoke with /persona list, /persona NAME, /persona spawn NAME TASK, /persona multi TASK, /persona create, /persona edit NAME, /persona delete NAME, /persona ref NAME, or /persona off.
 ---
 
 # Persona Manager
@@ -313,6 +313,7 @@ Scripts are available in `${CLAUDE_PLUGIN_ROOT}/skills/persona/scripts/`. Run th
 | `git-diff-working-broken.sh <good> <bad>` | debugger | When diagnosing a regression — structured diff between working and broken ref, with `git bisect` hint |
 | `dep-graph.sh [path]` | architect | When assessing coupling or planning a refactor — maps module import relationships and coupling hot spots |
 | `count-complexity.py [path] [--threshold N]` | code-reviewer, architect, debugger | When identifying high-risk functions — cyclomatic complexity per function, ranked by severity |
+| `collect-windows-facts.ps1 [-Area All\|Os\|Network\|Gpo\|Hardware]` | itproinstructor | When the user reports a sequence of events on his Windows machine and a shell on that machine is available — read-only; run with `pwsh -NoProfile -ExecutionPolicy Bypass -File`; prints build, updates, start-up time, domain role, DNS and adapter settings, `gpresult /r`, crash events |
 
 **Usage pattern:**
 1. Run the relevant script via Bash tool to get the data

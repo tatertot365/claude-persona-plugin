@@ -1,0 +1,42 @@
+{
+  "description": "ITproinstructor persona hooks. They do nothing unless the itproinstructor persona is active in the session. UserPromptSubmit names the persona rules the user's message triggers and gives each rule's text once; Stop checks the reply against the persona's hard rules; SessionStart (compact) puts the persona back after the conversation is compacted.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/itproinstructor-hook.js", "prompt", "${CLAUDE_PLUGIN_DATA}"],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/itproinstructor-hook.js", "stop", "${CLAUDE_PLUGIN_DATA}"],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/itproinstructor-hook.js", "session", "${CLAUDE_PLUGIN_DATA}"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
